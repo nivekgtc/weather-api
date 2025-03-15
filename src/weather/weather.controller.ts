@@ -12,7 +12,7 @@ export class WeatherController {
   async getWeatherByCity(@Query('city') city: string): Promise<WeatherResponseDto> {
     if (!city) {
       throw new BadRequestException({
-        message: 'Cidade não informada.',
+        message: 'City not informed.',
         code: 'CITY_REQUIRED',
       })
     }
