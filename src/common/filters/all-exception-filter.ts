@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { ThrottlerException } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { I18nService } from 'nestjs-i18n';
 
@@ -19,17 +20,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'errors.INTERNAL_SERVER_ERROR';
+    let messageKey = 'errors.INTERNAL_SERVER_ERROR';
     let errors: string[] | undefined;
 
     const lang = request.headers['accept-language'] || 'en';
 
     if (exception instanceof HttpException) {
-      status = exception.getStatus();
-
+      status = exception.getStatus() || HttpStatus.INTERNAL_SERVER_ERROR;
       const exceptionResponse = exception.getResponse();
 
-      // Se for erro de validação do ValidationPipe
       if (
         exception instanceof BadRequestException &&
         typeof exceptionResponse === 'object' &&
@@ -47,19 +46,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
               }),
             ];
 
-        message = 'errors.VALIDATION_ERROR'; // Mensagem genérica para erro de validação
-      } else {
-        message = await this.i18n.translate(exception.message, { lang });
+        messageKey = 'errors.VALIDATION_ERROR';
+      } else if (exception instanceof ThrottlerException) {
+        messageKey = exception.message;
+      } else if (
+        typeof exceptionResponse === 'object' &&
+        'message' in exceptionResponse
+      ) {
+        messageKey = exceptionResponse['message'] || 'errors.UNKNOWN_ERROR';
       }
-    } else {
-      message = await this.i18n.translate(message, { lang });
     }
+
+    const translatedMessage = await this.i18n.translate(messageKey, { lang });
 
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message,
+      message: translatedMessage,
       errors,
     });
   }

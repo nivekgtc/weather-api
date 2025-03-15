@@ -3,7 +3,10 @@ import {
   BadRequestException,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
+  NotFoundException,
   Query,
   UsePipes,
   ValidationPipe,
@@ -31,22 +34,39 @@ export class WeatherController {
     @Query() query: WeatherQueryDto,
     @I18nLang() lang: string,
   ): Promise<WeatherResponseDto> {
-    const { city } = query;
+    try {
+      const { city } = query;
 
-    if (!city) {
-      throw new BadRequestException({
-        message: this.i18n.translate('error.city_not_found', { lang }),
-        code: 'CITY_REQUIRED',
-      });
-    }
+      if (!city) {
+        throw new BadRequestException({
+          message: this.i18n.translate('errors.CITY_NOT_FOUND', { lang }),
+          code: 'CITY_REQUIRED',
+        });
+      }
 
-    const hasCache = await this.cacheManager.get<{
-      temp: number;
-      description: string;
-      city: string;
-    }>(city);
-    if (hasCache) {
-      const { temp, description } = hasCache;
+      const hasCache = await this.cacheManager.get<{
+        temp: number;
+        description: string;
+        city: string;
+      }>(city);
+      if (hasCache) {
+        const { temp, description } = hasCache;
+        const weather = {
+          city,
+          description,
+          temp: new Intl.NumberFormat(lang || 'en', {
+            style: 'unit',
+            unit: 'celsius',
+            unitDisplay: 'short',
+          }).format(temp),
+        };
+
+        return weather;
+      }
+
+      const { description, temp } =
+        await this.openWeatherService.getWeatherByCity(city, lang);
+
       const weather = {
         city,
         description,
@@ -57,24 +77,35 @@ export class WeatherController {
         }).format(temp),
       };
 
+      await this.cacheManager.set(city, { temp, description, city }, 6 * 1000);
+
       return weather;
+    } catch (error: any) {
+      if (error instanceof NotFoundException) throw error;
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data.message;
+
+        // if (status === 401) {
+        //   message = 'errors.INVALID_API_KEY';
+        // } else if (status === 404) {
+        //   message = 'errors.COORDINATES_NOT_FOUND';
+        // } else if (status >= 500) {
+        //   message = 'errors.SERVICE_UNAVAILABLE';
+        // }
+
+        throw new HttpException({ message }, status);
+      } else if (error.request) {
+        throw new HttpException(
+          { message: 'errors.NETWORK_ERROR' },
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      } else {
+        throw new HttpException(
+          { message: 'errors.UNKNOWN_ERROR' },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
-
-    const { description, temp } =
-      await this.openWeatherService.getWeatherByCity(city, lang);
-
-    const weather = {
-      city,
-      description,
-      temp: new Intl.NumberFormat(lang || 'en', {
-        style: 'unit',
-        unit: 'celsius',
-        unitDisplay: 'short',
-      }).format(temp),
-    };
-
-    await this.cacheManager.set(city, { temp, description, city }, 6 * 1000);
-
-    return weather;
   }
 }
