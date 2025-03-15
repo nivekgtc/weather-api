@@ -1,18 +1,31 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import {
+  AcceptLanguageResolver,
+  I18nJsonLoader,
+  I18nModule,
+} from 'nestjs-i18n';
+import path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { WeatherModule } from './weather/weather.module';
-import { OpenWeatherModule } from './open-weather/open-weather.module';
-import { AcceptLanguageResolver, I18nJsonLoader, I18nModule } from 'nestjs-i18n';
-import path from 'path';
-import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-exception-filter';
-import { CacheModule } from '@nestjs/cache-manager';
+import { OpenWeatherModule } from './open-weather/open-weather.module';
+import { WeatherModule } from './weather/weather.module';
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ],
+    }),
     CacheModule.register({
-      isGlobal: true
+      isGlobal: true,
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -27,11 +40,19 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     WeatherModule,
-    OpenWeatherModule.forRoot()],
+    OpenWeatherModule.forRoot(),
+  ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_FILTER,
-    useClass: AllExceptionsFilter,
-  },],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}
