@@ -1,0 +1,1 @@
+export const OPENWEATHER_OPTIONS = Symbol('OPENWEATHER_OPTIONS');
