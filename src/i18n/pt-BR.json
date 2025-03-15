@@ -1,0 +1,4 @@
+{
+  "greeting": "Olá, bem-vindo à nossa API!",
+  "error.city_not_found": "Cidade não encontrada."
+}

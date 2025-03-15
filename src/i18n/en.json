@@ -1,0 +1,4 @@
+{
+  "greeting": "Hello, welcome to our API!",
+  "error.city_not_found": "City not found."
+}

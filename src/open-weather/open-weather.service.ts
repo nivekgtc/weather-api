@@ -35,9 +35,9 @@ export class OpenWeatherService {
   /**
    * Gets the current temperature based on latitude and longitude
    */
-  async getWeatherByCoordinates(lat: number, lon: number): Promise<{ temp: number; description: string }> {
+  async getWeatherByCoordinates(lat: number, lon: number, lang: string): Promise<{ temp: number; description: string }> {
     const response = await this.axiosInstance.get('/data/3.0/onecall', {
-      params: { lat, lon, exclude: 'minutely,hourly,daily,alerts', units: 'metric', lang: 'pt' },
+      params: { lat, lon, exclude: 'minutely,hourly,daily,alerts', units: 'metric', lang: lang || 'en' },
     });
 
     return {
@@ -49,8 +49,8 @@ export class OpenWeatherService {
   /**
    * Gets the current temperature by city name (making two API calls)
    */
-  async getWeatherByCity(city: string) {
+  async getWeatherByCity(city: string, lang: string): Promise<{ temp: number; description: string }> {
     const { lat, lon } = await this.getCityCoordinates(city);
-    return this.getWeatherByCoordinates(lat, lon);
+    return this.getWeatherByCoordinates(lat, lon, lang);
   }
 }
