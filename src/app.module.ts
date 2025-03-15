@@ -8,9 +8,12 @@ import { AcceptLanguageResolver, I18nJsonLoader, I18nModule } from 'nestjs-i18n'
 import path from 'path';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-exception-filter';
-
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true
+    }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loader: I18nJsonLoader,
