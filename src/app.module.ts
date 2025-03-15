@@ -14,6 +14,7 @@ import { AppService } from './app.service';
 import { AllExceptionsFilter } from './common/filters/all-exception-filter';
 import { OpenWeatherModule } from './open-weather/open-weather.module';
 import { WeatherModule } from './weather/weather.module';
+
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -40,7 +41,7 @@ import { WeatherModule } from './weather/weather.module';
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     WeatherModule,
-    OpenWeatherModule.forRoot(),
+    OpenWeatherModule,
   ],
   controllers: [AppController],
   providers: [
