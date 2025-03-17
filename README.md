@@ -25,6 +25,54 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+# Weather App
+
+This project is a weather forecast API built using NestJS. It consumes the OpenWeather API to provide weather data for a given city.
+
+## How this application meets the Weather Challenge criteria
+
+### 1. Create a `/weather` route that receives a city name and then responds with the forecast for this city
+
+The application has a `/weather` route implemented in the `WeatherController`. This route receives a city name as a query parameter and responds with the weather forecast for that city.
+
+### 2. Validate user’s input
+
+User input is validated using `class-validator` in the `WeatherQueryDto`. The city name must be a non-empty string.
+
+### 3. Make sure you’re responding with an error for invalid cities or connection issues
+
+The application handles errors appropriately:
+- For invalid cities, a `NotFoundException` is thrown.
+- For connection issues, a `HttpException` with status `503` is thrown.
+
+These errors are caught and handled in the `WeatherController`.
+
+### 4. Apply unit tests for this route
+
+Unit tests are provided for the `WeatherController` and `OpenWeatherService`. Additionally, end-to-end (e2e) tests are provided to ensure the `/weather` route works as expected.
+
+### 5. Use a rate limiter to not get flooded
+
+The application uses the `ThrottlerModule` from NestJS to apply rate limiting. This is configured in the `AppModule`.
+
+### 6. The code architecture will affect your results
+
+The application follows a modular architecture, with separate modules for weather and OpenWeather integration. Controllers, services, and DTOs are used to keep the code organized and maintainable.
+
+### Additional Features
+
+#### Internationalization
+
+The application supports multiple languages using the `nestjs-i18n` module. Error messages and responses can be localized based on the `x-lang` header or query parameters.
+
+#### Swagger Documentation
+
+Swagger documentation is provided for the API. You can access it at `/api` after starting the application. This documentation is generated using the `@nestjs/swagger` module.
+
+#### Caching
+
+The application uses caching to improve performance and reduce the number of API calls to the OpenWeather API. The `@nestjs/cache-manager` module is used for caching weather data.
+
 ## Project setup
 
 ```bash
