@@ -1,8 +1,10 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class WeatherResponseDto {
-
-  @ApiProperty({ example: '25.7°C', description: 'Formatted temperature with unit' })
+  @ApiProperty({
+    example: '25.7°C',
+    description: 'Formatted temperature with unit',
+  })
   temp: string;
 
   @ApiProperty({ example: 'clear sky', description: 'Weather description' })
