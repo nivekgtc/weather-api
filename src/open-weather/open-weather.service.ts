@@ -4,7 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import toSnakeCase from 'src/common/utils/to-snake-case';
 import { ExternalLibService } from '../external-lib/external-lib.service';
+import { OpenWeatherLatLongResponseDto } from './dto/open-weather-latlong-response.dto';
+import { OpenWeatherResponseDto } from './dto/open-weather.response.dto';
 import { OPENWEATHER_OPTIONS } from './open-weather.constants';
 import { OpenWeatherOptions } from './open-weather.options';
 
@@ -21,9 +24,10 @@ export class OpenWeatherService {
   async getCityCoordinates(
     city: string,
   ): Promise<{ lat: number; lon: number }> {
-    const response = await this.externalLibService.getData(
-      '/geo/1.0/direct?q=' + city + '&limit=1',
-    );
+    const response =
+      await this.externalLibService.getData<OpenWeatherLatLongResponseDto>(
+        '/geo/1.0/direct?q=' + city + '&limit=1',
+      );
 
     if (!response.length) {
       throw new NotFoundException({
@@ -43,9 +47,11 @@ export class OpenWeatherService {
     lon: number,
     lang: string,
   ): Promise<{ temp: number; description: string }> {
-    const response = await this.externalLibService.getData(
-      `/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&lang=${lang || 'en'}`,
-    );
+    const snakeCaseLang = toSnakeCase(lang);
+    const response =
+      await this.externalLibService.getData<OpenWeatherResponseDto>(
+        `/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&lang=${snakeCaseLang || 'en'}`,
+      );
 
     return {
       temp: response.current.temp,

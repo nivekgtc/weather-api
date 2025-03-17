@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { WeatherController } from './weather.controller';
-import { OpenWeatherService } from '../open-weather/open-weather.service';
 import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { OpenWeatherService } from '../open-weather/open-weather.service';
+import { WeatherController } from './weather.controller';
 
 describe('WeatherController', () => {
   let controller: WeatherController;
@@ -37,9 +37,14 @@ describe('WeatherController', () => {
     const mockWeatherData = { temp: 25, description: 'clear sky' };
     mockOpenWeatherService.getWeatherByCity.mockResolvedValue(mockWeatherData);
 
-    const result = await controller.getWeatherByCity('São Paulo');
+    const result = await controller.getWeatherByCity(
+      { city: 'São Paulo' },
+      'pt-BR',
+    );
 
-    expect(openWeatherService.getWeatherByCity).toHaveBeenCalledWith('São Paulo');
+    expect(openWeatherService.getWeatherByCity).toHaveBeenCalledWith(
+      'São Paulo',
+    );
 
     expect(result).toEqual({
       city: 'São Paulo',
@@ -53,8 +58,12 @@ describe('WeatherController', () => {
   });
 
   it('should throw a BadRequestException when city is not provided', async () => {
-    await expect(controller.getWeatherByCity('')).rejects.toThrow(BadRequestException);
-    await expect(controller.getWeatherByCity('')).rejects.toThrowError('City not informed.');
+    await expect(
+      controller.getWeatherByCity({ city: '' }, 'pt-BR'),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      controller.getWeatherByCity({ city: '' }, 'pt-BR'),
+    ).rejects.toThrowError('City not informed.');
 
     expect(openWeatherService.getWeatherByCity).not.toHaveBeenCalled();
   });

@@ -8,12 +8,13 @@ import {
   Inject,
   NotFoundException,
   Query,
+  Request,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
-import { I18nLang, I18nService } from 'nestjs-i18n';
+import { I18n, I18nContext, I18nLang, I18nService } from 'nestjs-i18n';
 import { OpenWeatherService } from 'src/open-weather/open-weather.service';
 import { WeatherQueryDto } from './dto/weather.query.dto';
 import { WeatherResponseDto } from './dto/weather.response.dto';
@@ -23,6 +24,7 @@ import { WeatherResponseDto } from './dto/weather.response.dto';
 export class WeatherController {
   constructor(
     private readonly openWeatherService: OpenWeatherService,
+
     private readonly i18n: I18nService,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
@@ -80,19 +82,11 @@ export class WeatherController {
       await this.cacheManager.set(city, { temp, description, city }, 6 * 1000);
 
       return weather;
-    } catch (error: any) {
+    } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error.response) {
         const status = error.response.status;
         const message = error.response.data.message;
-
-        // if (status === 401) {
-        //   message = 'errors.INVALID_API_KEY';
-        // } else if (status === 404) {
-        //   message = 'errors.COORDINATES_NOT_FOUND';
-        // } else if (status >= 500) {
-        //   message = 'errors.SERVICE_UNAVAILABLE';
-        // }
 
         throw new HttpException({ message }, status);
       } else if (error.request) {
