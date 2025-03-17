@@ -6,6 +6,7 @@
 [x] - internationalization by locale
 
 ## Later
+- Add Github Actions to CI/CD
 - verify availability and response when not have status
 - units default lang in pt and units in metric (add support for changes)
 - we can add save preferenced cities
