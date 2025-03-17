@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
-  BadRequestException,
   Controller,
   Get,
   HttpException,
@@ -61,13 +60,6 @@ export class WeatherController {
   ): Promise<WeatherResponseDto> {
     try {
       const { city } = query;
-
-      if (!city) {
-        throw new BadRequestException({
-          message: this.i18n.translate('errors.CITY_NOT_FOUND', { lang }),
-          code: 'CITY_REQUIRED',
-        });
-      }
 
       const hasCache = await this.cacheManager.get<{
         temp: number;
