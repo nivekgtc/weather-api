@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
@@ -14,7 +13,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
 import { I18nLang, I18nService } from 'nestjs-i18n';
 import { OpenWeatherService } from 'src/open-weather/open-weather.service';
@@ -34,6 +33,28 @@ export class WeatherController {
 
   @Get()
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @ApiQuery({
+    name: 'city',
+    required: true,
+    description: 'Name of the city to get weather information for',
+    examples: WeatherQueryDto.examples,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Weather data retrieved successfully',
+    type: WeatherResponseDto,
+    example: WeatherResponseDto.examples.arcoverde,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    example: WeatherResponseDto.errorExamples.cityNotFound,
+  })
+  @ApiResponse({
+    status: 503,
+    description: 'Service Unavailable',
+    example: WeatherResponseDto.errorExamples.networkError,
+  })
   async getWeatherByCity(
     @Query() query: WeatherQueryDto,
     @I18nLang() lang: string,
