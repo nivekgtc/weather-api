@@ -5,10 +5,12 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import {
   AcceptLanguageResolver,
+  HeaderResolver,
   I18nJsonLoader,
   I18nModule,
+  QueryResolver,
 } from 'nestjs-i18n';
-import path from 'path';
+import * as path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AllExceptionsFilter } from './common/filters/all-exception-filter';
@@ -35,8 +37,14 @@ import { WeatherModule } from './weather/weather.module';
         path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
+      throwOnMissingKey: false,
       resolvers: [
-        { use: AcceptLanguageResolver, options: ['lang', 'locale', 'l'] },
+        {
+          use: QueryResolver,
+          options: ['lang', 'locale', 'l', 'accept-language'],
+        },
+        AcceptLanguageResolver,
+        new HeaderResolver(['x-lang', 'Accept-Language']),
       ],
     }),
     ConfigModule.forRoot({ isGlobal: true }),

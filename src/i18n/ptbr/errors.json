@@ -1,0 +1,9 @@
+{
+  "greeting": "Olá, bem-vindo à nossa API!",
+  "errors.INTERNAL_SERVER_ERROR": "Erro interno do servidor.",
+  "errors.VALIDATION_ERROR": "Erro de validação.",
+  "errors.THROTTLER_ERROR": "Muitas solicitações. Tente novamente mais tarde.",
+  "errors.UNKNOWN_ERROR": "Erro desconhecido.",
+  "errors.EXTERNAL_API_ERROR": "Erro na API externa.",
+  "errors.CITY_NOT_FOUND": "Cidade não encontrada."
+}

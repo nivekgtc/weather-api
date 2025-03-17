@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { EXTERNAL_LIB_OPTIONS } from './external-lib.constants';
@@ -49,8 +50,8 @@ export class ExternalLibService {
     );
   }
 
-  async getData(endpoint: string) {
-    const response = await this.axiosInstance.get(endpoint);
+  async getData<T>(endpoint: string): Promise<T> {
+    const response = await this.axiosInstance.get<T>(endpoint);
     return response.data;
   }
 }

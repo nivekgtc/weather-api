@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
@@ -8,13 +11,12 @@ import {
   Inject,
   NotFoundException,
   Query,
-  Request,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
-import { I18n, I18nContext, I18nLang, I18nService } from 'nestjs-i18n';
+import { I18nLang, I18nService } from 'nestjs-i18n';
 import { OpenWeatherService } from 'src/open-weather/open-weather.service';
 import { WeatherQueryDto } from './dto/weather.query.dto';
 import { WeatherResponseDto } from './dto/weather.response.dto';

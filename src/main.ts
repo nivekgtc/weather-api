@@ -1,13 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { I18nMiddleware } from 'nestjs-i18n';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(I18nMiddleware);
+
   const config = new DocumentBuilder()
     .setTitle('Weather API')
-    .setDescription('The Weather API allows you to retrieve forecast data for any location in the world.')
+    .setDescription(
+      'The Weather API allows you to retrieve forecast data for any location in the world.',
+    )
     .setVersion('1.0')
     .addTag('weather')
     .build();

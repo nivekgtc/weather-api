@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { Request, Response } from 'express';
-import { I18nService } from 'nestjs-i18n';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -19,11 +19,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    const i18n = I18nContext.current(host);
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let messageKey = 'errors.INTERNAL_SERVER_ERROR';
+    let messageKey: any = 'errors.INTERNAL_SERVER_ERROR';
     let errors: string[] | undefined;
-
-    const lang = request.headers['accept-language'] || 'en';
 
     if (exception instanceof HttpException) {
       status = exception.getStatus() || HttpStatus.INTERNAL_SERVER_ERROR;
@@ -36,15 +35,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ) {
         errors = Array.isArray(exceptionResponse.message)
           ? await Promise.all(
-              exceptionResponse.message.map((msg) =>
-                this.i18n.translate(msg, { lang }),
-              ),
+              exceptionResponse.message.map((msg) => i18n.translate(msg)),
             )
-          : [
-              await this.i18n.translate(exceptionResponse.message as string, {
-                lang,
-              }),
-            ];
+          : [await i18n.translate(exceptionResponse.message as string)];
 
         messageKey = 'errors.VALIDATION_ERROR';
       } else if (exception instanceof ThrottlerException) {
@@ -57,7 +50,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    const translatedMessage = await this.i18n.translate(messageKey, { lang });
+    const translatedMessage = await i18n.translate(messageKey);
 
     response.status(status).json({
       statusCode: status,
